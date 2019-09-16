@@ -3,7 +3,6 @@ library progress_button;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-
 /// A button that animates between state changes.
 /// Progress state is just a small circle with a progress indicator inside
 /// Error state is a vibrating error animation
@@ -39,12 +38,11 @@ class _ProgressButtonState extends State<ProgressButton>
   Animation<double> _widthAnimation;
 
   double get buttonWidth => _widthAnimation.value ?? 0;
-  BorderRadius get borderRadius => _borderAnimation.value ?? BorderRadius.circular(12);
+  BorderRadius get borderRadius =>
+      _borderAnimation.value ?? BorderRadius.circular(12);
 
   Color get backgroundColor =>
-      widget.backgroundColor ?? Theme
-          .of(context)
-          .primaryColor;
+      widget.backgroundColor ?? Theme.of(context).primaryColor;
 
   Color get progressColor => widget.progressColor ?? Colors.white;
 
@@ -54,11 +52,11 @@ class _ProgressButtonState extends State<ProgressButton>
   void initState() {
     super.initState();
 
-    _errorAnimationController = new AnimationController(
-        vsync: this, duration: Duration(milliseconds: 400));
+    _errorAnimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
 
-    _progressAnimationController = new AnimationController(
-        vsync: this, duration: Duration(milliseconds: 200));
+    _progressAnimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
 
     // Define errorAnimation sequence
     _errorAnimation = TweenSequence<Offset>([
@@ -102,6 +100,13 @@ class _ProgressButtonState extends State<ProgressButton>
     }
   }
 
+  @override
+  void dispose() {
+    _progressAnimationController.dispose();
+    _errorAnimationController.dispose();
+    super.dispose();
+  }
+
   /// A utility function to check whether an animation is running
   bool isAnimationRunning(AnimationController controller) {
     return !(controller.isCompleted || controller.isDismissed);
@@ -114,29 +119,36 @@ class _ProgressButtonState extends State<ProgressButton>
 
   AnimatedBuilder getErrorAnimatedBuilder() {
     return AnimatedBuilder(
-        animation: _errorAnimationController,
-        builder: (context, child) {
-          return SlideTransition(
-              position: _errorAnimation,
-              child: LayoutBuilder(builder: getProgressAnimatedBuilder
-              )
-          );
-        });
+      animation: _errorAnimationController,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _errorAnimation,
+          child: LayoutBuilder(
+            builder: getProgressAnimatedBuilder,
+          ),
+        );
+      },
+    );
   }
 
-  AnimatedBuilder getProgressAnimatedBuilder(BuildContext context, BoxConstraints constraints) {
+  AnimatedBuilder getProgressAnimatedBuilder(
+      BuildContext context, BoxConstraints constraints) {
     var buttonHeight = constraints.maxHeight;
     // If there is no constraint on height, we should constrain it
-    if (buttonHeight == double.infinity) buttonHeight = 48;
+    if (buttonHeight == double.infinity)
+      buttonHeight = Theme.of(context).buttonTheme.height;
 
     // These animation configurations can be tweaked to have
     // however you like it
     _borderAnimation = BorderRadiusTween(
-        begin: BorderRadius.circular(buttonHeight / 6),
-        end: BorderRadius.circular(buttonHeight / 2))
-        .animate(CurvedAnimation(
+      begin: BorderRadius.circular(2 /*buttonHeight / 6*/),
+      end: BorderRadius.circular(buttonHeight / 2),
+    ).animate(
+      CurvedAnimation(
         parent: _progressAnimationController,
-        curve: Curves.linear));
+        curve: Curves.linear,
+      ),
+    );
 
     _widthAnimation = Tween<double>(
       begin: constraints.maxWidth,
@@ -148,22 +160,21 @@ class _ProgressButtonState extends State<ProgressButton>
 
     Widget buttonContent;
 
-    if (widget.buttonState != ButtonState.inProgress ||
+    if (widget.buttonState != ButtonState.inProgress &&
         !isAnimationRunning(_progressAnimationController)) {
       buttonContent = child;
-
     } else if (widget.buttonState == ButtonState.inProgress) {
       buttonContent = SizedBox(
-          height: buttonHeight,
-          width: buttonHeight, // needs to be a square container
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                  progressColor ?? Colors.white),
-              strokeWidth: 3,
-            ),
-          )
+        height: buttonHeight,
+        width: buttonHeight, // needs to be a square container
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: CircularProgressIndicator(
+            valueColor:
+            AlwaysStoppedAnimation<Color>(progressColor ?? Colors.white),
+            strokeWidth: 3,
+          ),
+        ),
       );
     }
 
@@ -171,19 +182,21 @@ class _ProgressButtonState extends State<ProgressButton>
       animation: _progressAnimationController,
       builder: (context, child) {
         return InkWell(
-            onTap: widget.onPressed,
-            borderRadius: borderRadius,
-            // this fixes the ripple effect
-            child: Center(
-              child: Ink(
-                width: buttonWidth,
-                height: buttonHeight,
-                decoration: BoxDecoration(
-                    borderRadius: borderRadius,
-                    color: backgroundColor),
-                child: Center(child: buttonContent),
+          onTap: widget.onPressed,
+          borderRadius: borderRadius,
+          // this fixes the ripple effect
+          child: Center(
+            child: Ink(
+              width: buttonWidth,
+              height: buttonHeight,
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                color: backgroundColor,
               ),
-            ));
+              child: Center(child: buttonContent),
+            ),
+          ),
+        );
       },
     );
   }

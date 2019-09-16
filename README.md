@@ -12,7 +12,12 @@ dependencies:
   progress_button: ^0.0.2
 ```
 
-- Second, add progress button to your widget tree
+- Second, import the file
+```
+import 'package:progress_button/progress_button.dart';
+```
+
+- Third, add progress button to your widget tree
 ```dart
 val progressButton = ProgressButton(
     child: Text("Login"),
