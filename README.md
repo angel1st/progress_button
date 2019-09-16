@@ -9,7 +9,7 @@ ProgressButton is designed to be easy to use and customizable. Without going int
 - First, add dependency to your pubspec.yaml
 ```yaml
 dependencies:
-  progress_button: ^0.0.2
+  progress_button: ^1.0.0
 ```
 
 - Second, import the file
